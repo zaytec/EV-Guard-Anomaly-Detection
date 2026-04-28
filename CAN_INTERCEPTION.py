@@ -1,7 +1,5 @@
-# ================================
-# SMART ANOMALY DETECTION SYSTEM
-# ================================
 
+# SMART ANOMALY DETECTION SYSTEM
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,9 +12,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense
 
-# ================================
-# STEP 1: GENERATE SYNTHETIC DATA
-# ================================
+# GENERATE SYNTHETIC DATA
 np.random.seed(42)
 
 n = 3000
@@ -38,17 +34,15 @@ df = pd.DataFrame({
     "label": labels
 })
 
-# ================================
-# STEP 2: PREPROCESSING
-# ================================
+
+# PREPROCESSING
+
 scaler = MinMaxScaler()
 data_scaled = scaler.fit_transform(df[['value']])
 
 train = data_scaled[:2000]  # normal training portion
 
-# ================================
-# STEP 3: AUTOENCODER
-# ================================
+# AUTOENCODER
 input_dim = train.shape[1]
 
 input_layer = Input(shape=(input_dim,))
@@ -69,16 +63,15 @@ autoencoder.fit(train, train,
 recon = autoencoder.predict(data_scaled)
 mse = np.mean(np.power(data_scaled - recon, 2), axis=1)
 
-# ================================
-# STEP 4: ISOLATION FOREST
-# ================================
+
+# ISOLATION FOREST
+
 iso = IsolationForest(contamination=0.03, random_state=42)
 iso.fit(train)
 iso_pred = iso.predict(data_scaled)
 
-# ================================
-# STEP 5: COMBINE RESULTS
-# ================================
+# COMBINE RESULTS
+
 threshold = np.percentile(mse, 95)
 auto_pred = mse > threshold
 
@@ -86,9 +79,8 @@ final_pred = np.logical_or(auto_pred, iso_pred == -1).astype(int)
 
 df['anomaly'] = final_pred
 
-# ================================
-# STEP 6: EVALUATION
-# ================================
+# EVALUATION
+
 y_true = df['label']
 y_pred = df['anomaly']
 
@@ -103,10 +95,9 @@ print(f"Precision : {precision*100:.2f}%")
 print(f"Recall    : {recall*100:.2f}%")
 print(f"F1 Score  : {f1*100:.2f}%")
 
-# ================================
-# STEP 7: PLOT (LINKEDIN READY)
-# ================================
-plt.figure(figsize=(15,6))
+
+# PLOT (LINKEDIN READY)t.figure(figsize=(15,6))
+
 plt.plot(df['value'], label='Signal')
 plt.scatter(df.index[df['anomaly']],
             df['value'][df['anomaly']],
@@ -116,10 +107,8 @@ plt.title("Anomaly Detection in Time-Series Data")
 plt.savefig("anomaly_plot.png", dpi=300)
 plt.show()
 
-# ================================
-# STEP 8: CONFUSION MATRIX
-# ================================
-cm = confusion_matrix(y_true, y_pred)
+
+#CONFUSION MATRIX
 
 plt.figure(figsize=(6,5))
 sns.heatmap(cm, annot=True, fmt='d')
